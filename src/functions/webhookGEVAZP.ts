@@ -1,8 +1,6 @@
 import { APIGatewayProxyHandler } from "aws-lambda";
 import { S3 } from "aws-sdk";
 import dayjs from "dayjs";
-import { join, resolve } from "path";
-import fs, { readFileSync } from "fs";
 import axios from "axios";
 
 interface IWebhookProps {
@@ -16,26 +14,60 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   const date = dayjs(periodicidade).format("YYYYMM");
 
-  const nameFile = `Gevazp_${date}.zip`;
+  // const nameFile = `Gevazp_${date}.zip`;
 
-  const pathTmp = join(process.cwd(), "tmp", nameFile);
-  const writer = fs.createWriteStream(pathTmp);
+  let nameFile = "";
+
+  if (nome === "IPDO Editável") {
+    nameFile = `IPDO_${date}.xlsm`;
+  } else if (nome === "Carga por patamar - DECOMP") {
+    nameFile = `Decomp_${date}.zip`;
+  } else if (
+    nome === "Resultados preliminares não consistidos  (vazões semanais - PMO)"
+  ) {
+    nameFile = `N_consistidos_${date}.zip`;
+  } else if (
+    nome === "Resultados preliminares consistidos (vazões semanais - PMO)"
+  ) {
+    nameFile = `Consistidos_${date}.zip`;
+  } else if (nome === "Arquivos de Previsão de Carga para o DESSEM") {
+    nameFile = `Dessem_${date}.zip`;
+  } else if (nome === "Arquivos dos modelos de geração de cenários de vazões") {
+    nameFile = `Gevazp_${date}.zip`;
+  }
+
+  const s3 = new S3();
+
+  const acessBucket = await s3
+    .listObjectsV2({ Bucket: "bucket-docs-nodejs" })
+    .promise();
+
+  const listFilesBucket = acessBucket.Contents?.map((item) => item.Key).filter(
+    (item) => item?.includes(nameFile.split("_")[0])
+  )[0];
+
+  console.log(listFilesBucket);
+
+  if (listFilesBucket) {
+    await s3
+      .deleteObject({
+        Bucket: "bucket-docs-nodejs",
+        Key: listFilesBucket,
+      })
+      .promise();
+  }
 
   const response = await axios({
     url,
     method: "GET",
-    responseType: "stream",
+    responseType: "arraybuffer",
   });
-
-  await response.data.pipe(writer);
-
-  const s3 = new S3();
 
   await s3
     .putObject({
-      Bucket: "nome do bucket",
+      Body: response.data,
+      Bucket: "bucket-docs-nodejs",
       Key: nameFile,
-      Body: pathTmp,
     })
     .promise();
 
