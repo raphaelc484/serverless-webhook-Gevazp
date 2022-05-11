@@ -2,6 +2,7 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { S3 } from "aws-sdk";
 import dayjs from "dayjs";
 import axios from "axios";
+import { TestWebhookResponse } from "../api/testApi";
 
 interface IWebhookProps {
   url: string;
@@ -12,28 +13,45 @@ interface IWebhookProps {
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { url, nome, periodicidade } = JSON.parse(event.body) as IWebhookProps;
 
+  // console.log(url, nome, periodicidade);
+
+  // const t = new TestWebhookResponse();
+
+  // await t.execute({ url, nome, periodicidade });
+
   const date = dayjs(periodicidade).format("YYYYMM");
 
-  // const nameFile = `Gevazp_${date}.zip`;
-
   let nameFile = "";
+  let name = "";
 
   if (nome === "IPDO Editável") {
-    nameFile = `IPDO_${date}.xlsm`;
+    name = "IPDO";
+    nameFile = `${name}_${date}.xlsm`;
   } else if (nome === "Carga por patamar - DECOMP") {
-    nameFile = `Decomp_${date}.zip`;
+    name = "Decomp";
+    nameFile = `${name}_${date}.zip`;
   } else if (
     nome === "Resultados preliminares não consistidos  (vazões semanais - PMO)"
   ) {
-    nameFile = `N_consistidos_${date}.zip`;
+    name = "N_consistidos";
+    nameFile = `${name}_${date}.zip`;
   } else if (
     nome === "Resultados preliminares consistidos (vazões semanais - PMO)"
   ) {
-    nameFile = `Consistidos_${date}.zip`;
+    name = "Consistidos";
+    nameFile = `${name}_${date}.zip`;
   } else if (nome === "Arquivos de Previsão de Carga para o DESSEM") {
-    nameFile = `Dessem_${date}.zip`;
+    name = "Dessem";
+    nameFile = `${name}_${date}.zip`;
   } else if (nome === "Arquivos dos modelos de geração de cenários de vazões") {
-    nameFile = `Gevazp_${date}.zip`;
+    name = "Gevazp";
+    nameFile = `${name}_${date}.zip`;
+  } else if (nome === "Acomph") {
+    name = "Acomph";
+    nameFile = `${name}_${date}.xls`;
+  } else if (nome === "RDH") {
+    name = "RDH";
+    nameFile = `${name}_${date}.xlsx`;
   }
 
   const s3 = new S3();
@@ -43,16 +61,14 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     .promise();
 
   const listFilesBucket = acessBucket.Contents?.map((item) => item.Key).filter(
-    (item) => item?.includes(nameFile.split("_")[0])
+    (item) => item?.includes(`${name}/${nameFile.split("_")[0]}`)
   )[0];
-
-  console.log(listFilesBucket);
 
   if (listFilesBucket) {
     await s3
       .deleteObject({
         Bucket: "bucket-docs-nodejs",
-        Key: listFilesBucket,
+        Key: `${name}/${listFilesBucket}`,
       })
       .promise();
   }
@@ -66,7 +82,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   await s3
     .putObject({
       Body: response.data,
-      Bucket: "bucket-docs-nodejs",
+      Bucket: `bucket-docs-nodejs/${name}`,
       Key: nameFile,
     })
     .promise();
