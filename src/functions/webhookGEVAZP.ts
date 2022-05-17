@@ -2,7 +2,7 @@ import { APIGatewayProxyHandler } from "aws-lambda";
 import { S3 } from "aws-sdk";
 import dayjs from "dayjs";
 import axios from "axios";
-import { TestWebhookResponse } from "../api/testApi";
+import unzipper from "unzipper";
 
 interface IWebhookProps {
   url: string;
@@ -61,14 +61,26 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     .promise();
 
   const listFilesBucket = acessBucket.Contents?.map((item) => item.Key).filter(
-    (item) => item?.includes(`${name}/${nameFile.split("_")[0]}`)
-  )[0];
+    (item) => item?.startsWith(`${name}/`) && !item?.endsWith(`${name}/`)
+  );
 
-  if (listFilesBucket) {
+  const listTest = [];
+
+  for (let i = 0; i < listFilesBucket.length; i += 1) {
+    listTest.push({
+      Key: listFilesBucket[i],
+    });
+  }
+
+  await Promise.all(listTest);
+
+  if (listFilesBucket.length > 0) {
     await s3
-      .deleteObject({
+      .deleteObjects({
         Bucket: "bucket-docs-nodejs",
-        Key: `${name}/${listFilesBucket}`,
+        Delete: {
+          Objects: listTest,
+        },
       })
       .promise();
   }
@@ -82,10 +94,45 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   await s3
     .putObject({
       Body: response.data,
-      Bucket: `bucket-docs-nodejs/${name}`,
-      Key: nameFile,
+      Bucket: "bucket-docs-nodejs",
+      Key: `${name}/${nameFile}`,
     })
     .promise();
+
+  if (nameFile.includes(".zip")) {
+    const zip = s3
+      .getObject({
+        Bucket: "bucket-docs-nodejs",
+        Key: `${name}/${nameFile}`,
+      })
+      .createReadStream()
+      .pipe(unzipper.Parse({ forceStream: true }));
+
+    const promises = [];
+
+    let num = 0;
+
+    for await (const e of zip) {
+      const entry = e;
+
+      const fileName = entry.path;
+      const type = entry.type;
+      if (type === "File") {
+        const uploadParams = {
+          Bucket: "bucket-docs-nodejs",
+          Key: `${name}/${fileName}`,
+          Body: entry,
+        };
+
+        promises.push(s3.upload(uploadParams).promise());
+        num++;
+      } else {
+        entry.autodrain();
+      }
+    }
+
+    await Promise.all(promises);
+  }
 
   return {
     statusCode: 201,

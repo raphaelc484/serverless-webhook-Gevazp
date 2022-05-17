@@ -38,6 +38,23 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    databaseIPDO: {
+      handler: "src/functions/databaseIPDO.handler",
+      events: [
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "S3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "IPDO/",
+                suffix: ".xlsm",
+              },
+            ],
+          },
+        },
+      ],
+    },
   },
   package: { individually: true },
   custom: {
