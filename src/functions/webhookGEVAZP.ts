@@ -110,8 +110,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
     const promises = [];
 
-    let num = 0;
-
     for await (const e of zip) {
       const entry = e;
 
@@ -125,7 +123,6 @@ export const handler: APIGatewayProxyHandler = async (event) => {
         };
 
         promises.push(s3.upload(uploadParams).promise());
-        num++;
       } else {
         entry.autodrain();
       }

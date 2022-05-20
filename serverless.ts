@@ -44,13 +44,14 @@ const serverlessConfiguration: AWS = {
         {
           s3: {
             bucket: "bucket-docs-nodejs",
-            event: "S3:ObjectCreated:*",
+            event: "s3:ObjectCreated:*",
             rules: [
               {
                 prefix: "IPDO/",
                 suffix: ".xlsm",
               },
             ],
+            existing: true
           },
         },
       ],
