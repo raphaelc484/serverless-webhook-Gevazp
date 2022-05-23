@@ -13,9 +13,11 @@
   "dependencies": {
     "@middy/core": "^2.5.3",
     "@middy/http-json-body-parser": "^2.5.3",
+    "@prisma/client": "^3.14.0",
     "axios": "^0.26.1",
     "chrome-aws-lambda": "^10.1.0",
     "dayjs": "^1.11.0",
+    "prisma": "^3.14.0",
     "unzipper": "^0.10.11",
     "xlsx": "^0.18.5",
     "yauzl": "^2.10.0"

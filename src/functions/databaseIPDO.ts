@@ -1,3 +1,4 @@
+import { PrismaClient } from "@prisma/client";
 import { S3Handler } from "aws-lambda";
 import { S3 } from "aws-sdk";
 import XLSX from "xlsx";
@@ -12,13 +13,24 @@ export const handler: S3Handler = async (event) => {
     .getObject({ Bucket: bucketName, Key: fileKey })
     .promise();
 
-  const wb = XLSX.read(dataRead.Body, { type: "buffer" });
-  // const ws = wb.Sheets.IPDO;
+  if (dataRead) {
+    const prisma = new PrismaClient();
 
-  console.log(wb);
+    const result = await prisma.tbl_arm_ssis.findMany({
+      take: 4,
+      where: {
+        cod_fonte: 3,
+      },
+      orderBy: {
+        dat_medicao: "desc",
+      },
+    });
 
-  // if (dataRead) {
-  //   const wb = XLSX.readFile(dataRead.Body);
-  //   const ws = wb.Sheets.IPDO;
-  // }
+    console.log(result);
+
+    const wb = XLSX.read(dataRead.Body, { type: "buffer" });
+    const ws = wb.Sheets.IPDO;
+
+    console.log("lendo excel: ", ws.R65.v);
+  }
 };

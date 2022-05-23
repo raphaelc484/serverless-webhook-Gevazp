@@ -13,12 +13,6 @@ interface IWebhookProps {
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { url, nome, periodicidade } = JSON.parse(event.body) as IWebhookProps;
 
-  // console.log(url, nome, periodicidade);
-
-  // const t = new TestWebhookResponse();
-
-  // await t.execute({ url, nome, periodicidade });
-
   const date = dayjs(periodicidade).format("YYYYMM");
 
   let nameFile = "";
