@@ -9,10 +9,7 @@ export const handler: S3Handler = async (event) => {
   const s3 = new S3();
 
   const dataRead = await s3
-    .getObject({ Bucket: bucketName, Key: fileKey }, (err, data) => {
-      if (err) err;
-      else data;
-    })
+    .getObject({ Bucket: bucketName, Key: fileKey })
     .promise();
 
   const wb = XLSX.read(dataRead.Body, { type: "buffer" });

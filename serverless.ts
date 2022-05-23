@@ -48,10 +48,12 @@ const serverlessConfiguration: AWS = {
             rules: [
               {
                 prefix: "IPDO/",
+              },
+              {
                 suffix: ".xlsm",
               },
             ],
-            existing: true
+            existing: true,
           },
         },
       ],
