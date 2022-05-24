@@ -15,6 +15,7 @@ export const handler: S3Handler = async (event) => {
 
   if (dataRead) {
     const prisma = new PrismaClient();
+    await prisma.$connect();
 
     const result = await prisma.tbl_arm_ssis.findMany({
       take: 4,
@@ -27,6 +28,7 @@ export const handler: S3Handler = async (event) => {
     });
 
     console.log(result);
+    prisma.$disconnect();
 
     const wb = XLSX.read(dataRead.Body, { type: "buffer" });
     const ws = wb.Sheets.IPDO;
