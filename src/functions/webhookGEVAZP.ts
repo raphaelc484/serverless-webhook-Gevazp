@@ -3,6 +3,7 @@ import { S3 } from "aws-sdk";
 import dayjs from "dayjs";
 import axios from "axios";
 import unzipper from "unzipper";
+import { document } from "../utils/dynamodbClient";
 
 interface IWebhookProps {
   url: string;
@@ -12,6 +13,31 @@ interface IWebhookProps {
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { url, nome, periodicidade } = JSON.parse(event.body) as IWebhookProps;
+
+  // await document
+  //   .put({
+  //     TableName: "received_tables",
+  //     Item: {
+  //       id: "218c244f-9b24-4063-af89-1b93020d219a",
+  //       nome: nome,
+  //       periodicidade: periodicidade,
+  //       url: url,
+  //     },
+  //   })
+  //   .promise();
+
+  // const response = await document
+  //   .query({
+  //     TableName: "received_table",
+  //     KeyConditionExpression: "nome = :nome and periodicidade = :periodicidade",
+  //     ExpressionAttributeValues: {
+  //       ":nome": nome,
+  //       ":periodicidade": periodicidade,
+  //     },
+  //   })
+  //   .promise();
+
+  // console.log(response);
 
   const date = dayjs(periodicidade).format("YYYYMM");
 

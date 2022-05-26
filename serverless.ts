@@ -101,24 +101,32 @@ const serverlessConfiguration: AWS = {
   },
   resources: {
     Resources: {
-      dbCertificateUsers: {
+      dbDocuments: {
         Type: "AWS::DynamoDB::Table",
         Properties: {
-          TableName: "received_table",
+          TableName: "received_tables",
           ProvisionedThroughput: {
             ReadCapacityUnits: 8,
             WriteCapacityUnits: 8,
           },
-          AttributeDefinitions: [
-            {
-              AttributeName: "id",
-              AttributeType: "S",
-            },
-          ],
           KeySchema: [
             {
-              AttributeName: "id",
-              KeyType: "HASH",
+              AttributeName: "nome",
+              KeyType: "HASH", //Partition key
+            },
+            {
+              AttributeName: "periodicidade",
+              KeyType: "RANGE", //Sort key
+            },
+          ],
+          AttributeDefinitions: [
+            {
+              AttributeName: "nome",
+              AttributeType: "S",
+            },
+            {
+              AttributeName: "periodicidade",
+              AttributeType: "S",
             },
           ],
         },
