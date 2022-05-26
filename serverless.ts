@@ -3,7 +3,11 @@ import type { AWS } from "@serverless/typescript";
 const serverlessConfiguration: AWS = {
   service: "webhook-sintegre-gevazp",
   frameworkVersion: "3",
-  plugins: ["serverless-esbuild", "serverless-offline"],
+  plugins: [
+    "serverless-dotenv-plugin",
+    "serverless-esbuild",
+    "serverless-offline",
+  ],
   provider: {
     name: "aws",
     runtime: "nodejs14.x",
@@ -59,7 +63,16 @@ const serverlessConfiguration: AWS = {
       ],
     },
   },
-  package: { individually: true },
+  package: {
+    individually: true,
+    patterns: [
+      "!node_modules/.prisma/client/libquery_engine-*",
+      "node_modules/.prisma/client/libquery_engine-rhel-*",
+      "node_modules/.prisma/client/schema.prisma",
+      "!node_modules/prisma/libquery_engine-*",
+      "!node_modules/@prisma/engines/**",
+    ],
+  },
   custom: {
     esbuild: {
       bundle: true,
