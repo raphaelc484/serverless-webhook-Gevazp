@@ -3,6 +3,7 @@ import { S3 } from "aws-sdk";
 import dayjs from "dayjs";
 import axios from "axios";
 import unzipper from "unzipper";
+import { takeName } from "../util/takeName";
 import { PrismaClient } from "@prisma/client";
 
 interface IWebhookProps {
@@ -16,38 +17,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
 
   const date = dayjs(periodicidade).format("YYYYMM");
 
-  let nameFile = "";
-  let name = "";
-
-  if (nome === "IPDO Editável") {
-    name = "IPDO";
-    nameFile = `${name}_${date}.xlsm`;
-  } else if (nome === "Carga por patamar - DECOMP") {
-    name = "Decomp";
-    nameFile = `${name}_${date}.zip`;
-  } else if (
-    nome === "Resultados preliminares não consistidos  (vazões semanais - PMO)"
-  ) {
-    name = "N_consistidos";
-    nameFile = `${name}_${date}.zip`;
-  } else if (
-    nome === "Resultados preliminares consistidos (vazões semanais - PMO)"
-  ) {
-    name = "Consistidos";
-    nameFile = `${name}_${date}.zip`;
-  } else if (nome === "Arquivos de Previsão de Carga para o DESSEM") {
-    name = "Dessem";
-    nameFile = `${name}_${date}.zip`;
-  } else if (nome === "Arquivos dos modelos de geração de cenários de vazões") {
-    name = "Gevazp";
-    nameFile = `${name}_${Number(date) + 1}.zip`;
-  } else if (nome === "Acomph") {
-    name = "Acomph";
-    nameFile = `${name}_${date}.xls`;
-  } else if (nome === "RDH") {
-    name = "RDH";
-    nameFile = `${name}_${date}.xlsx`;
-  }
+  const dataName = await takeName({ nome, date });
 
   const s3 = new S3();
 
@@ -56,7 +26,9 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     .promise();
 
   const listFilesBucket = acessBucket.Contents?.map((item) => item.Key).filter(
-    (item) => item?.startsWith(`${name}/`) && !item?.endsWith(`${name}/`)
+    (item) =>
+      item?.startsWith(`${dataName.name}/`) &&
+      !item?.endsWith(`${dataName.name}/`)
   );
 
   const listTest = [];
@@ -90,7 +62,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     .putObject({
       Body: response.data,
       Bucket: "bucket-docs-nodejs",
-      Key: `${name}/${nameFile}`,
+      Key: `${dataName.name}/${dataName.nameFile}`,
     })
     .promise();
 
@@ -99,7 +71,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   const findRegister = await prisma.tbl_file_data.findFirst({
     take: 1,
     where: {
-      nom_file: name,
+      nom_file: dataName.name,
       dat_file_publi: new Date(periodicidade),
     },
   });
@@ -107,7 +79,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
   if (!findRegister) {
     await prisma.tbl_file_data.create({
       data: {
-        nom_file: name,
+        nom_file: dataName.name,
         dat_file_publi: new Date(periodicidade),
         dat_file_download: new Date(),
       },
@@ -123,11 +95,11 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     });
   }
 
-  if (nameFile.includes(".zip")) {
+  if (dataName.nameFile.includes(".zip")) {
     const zip = s3
       .getObject({
         Bucket: "bucket-docs-nodejs",
-        Key: `${name}/${nameFile}`,
+        Key: `${dataName.name}/${dataName.nameFile}`,
       })
       .createReadStream()
       .pipe(unzipper.Parse({ forceStream: true }));
@@ -142,7 +114,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       if (type === "File") {
         const uploadParams = {
           Bucket: "bucket-docs-nodejs",
-          Key: `${name}/${fileName}`,
+          Key: `${dataName.name}/${fileName}`,
           Body: entry,
         };
 
