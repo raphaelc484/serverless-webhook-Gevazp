@@ -18,14 +18,13 @@ export const handler: S3Handler = async (event) => {
     try {
       const prisma = new PrismaClient();
 
-      //criar uma checagem de tempo puxando da tabela que irá guardar os dados periodicidade
       const findLastDateDocType = await prisma.tbl_file_data.findFirst({
         where: {
           nom_file: docType,
         },
       });
 
-      const result = await prisma.tbl_arm_ssis.findMany({
+      const findLastDataInSystem = await prisma.tbl_arm_ssis.findMany({
         take: 4,
         where: {
           dat_medicao: findLastDateDocType.dat_file_publi,
@@ -33,21 +32,72 @@ export const handler: S3Handler = async (event) => {
         },
       });
 
-
-      // const t = await prisma.tbl_arm_ssis.upsert({
-      //   where: {
-      //     cod_fonte: 3,
-      //   },
-      // });
-
-      // const test = await prisma.tbl_arm_ssis.upsert({
-      //   where: {
-      //     dat_medicao:
-      //   }
-      // })
-
       const wb = XLSX.read(dataRead.Body, { type: "buffer" });
       const ws = wb.Sheets.IPDO;
+
+      await prisma.tbl_arm_ssis.upsert({
+        where: {
+          id: findLastDataInSystem[0].id,
+        },
+        create: {
+          cod_fonte: 3,
+          num_ssis: 1,
+          dat_medicao: findLastDateDocType.dat_file_publi,
+          val_arm_p: ws.R65.v,
+        },
+        update: {
+          num_ssis: 1,
+          val_arm_p: ws.R65.v,
+        },
+      });
+
+      await prisma.tbl_arm_ssis.upsert({
+        where: {
+          id: findLastDataInSystem[1].id,
+        },
+        create: {
+          cod_fonte: 3,
+          num_ssis: 2,
+          dat_medicao: findLastDateDocType.dat_file_publi,
+          val_arm_p: ws.R64.v,
+        },
+        update: {
+          num_ssis: 2,
+          val_arm_p: ws.R64.v,
+        },
+      });
+
+      await prisma.tbl_arm_ssis.upsert({
+        where: {
+          id: findLastDataInSystem[2].id,
+        },
+        create: {
+          cod_fonte: 3,
+          num_ssis: 3,
+          dat_medicao: findLastDateDocType.dat_file_publi,
+          val_arm_p: ws.R63.v,
+        },
+        update: {
+          num_ssis: 3,
+          val_arm_p: ws.R63.v,
+        },
+      });
+
+      await prisma.tbl_arm_ssis.upsert({
+        where: {
+          id: findLastDataInSystem[3].id,
+        },
+        create: {
+          cod_fonte: 3,
+          num_ssis: 4,
+          dat_medicao: findLastDateDocType.dat_file_publi,
+          val_arm_p: ws.R62.v,
+        },
+        update: {
+          num_ssis: 4,
+          val_arm_p: ws.R62.v,
+        },
+      });
     } catch (error) {
       console.log(error);
     }
