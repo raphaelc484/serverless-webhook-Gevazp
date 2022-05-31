@@ -257,3 +257,10 @@ model tlb_tipo_fatores_regressao {
 
   @@id([num_posto, num_mes])
 }
+
+model tbl_file_data {
+  num_file          Int      @id @default(autoincrement())
+  nom_file          String   @db.VarChar(20)
+  dat_file_publi    DateTime @db.Date
+  dat_file_download DateTime @db.Date
+}

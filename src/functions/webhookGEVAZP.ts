@@ -3,7 +3,7 @@ import { S3 } from "aws-sdk";
 import dayjs from "dayjs";
 import axios from "axios";
 import unzipper from "unzipper";
-import { document } from "../utils/dynamodbClient";
+import { PrismaClient } from "@prisma/client";
 
 interface IWebhookProps {
   url: string;
@@ -13,31 +13,6 @@ interface IWebhookProps {
 
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { url, nome, periodicidade } = JSON.parse(event.body) as IWebhookProps;
-
-  // await document
-  //   .put({
-  //     TableName: "received_tables",
-  //     Item: {
-  //       id: "218c244f-9b24-4063-af89-1b93020d219a",
-  //       nome: nome,
-  //       periodicidade: periodicidade,
-  //       url: url,
-  //     },
-  //   })
-  //   .promise();
-
-  // const response = await document
-  //   .query({
-  //     TableName: "received_table",
-  //     KeyConditionExpression: "nome = :nome and periodicidade = :periodicidade",
-  //     ExpressionAttributeValues: {
-  //       ":nome": nome,
-  //       ":periodicidade": periodicidade,
-  //     },
-  //   })
-  //   .promise();
-
-  // console.log(response);
 
   const date = dayjs(periodicidade).format("YYYYMM");
 
@@ -65,7 +40,7 @@ export const handler: APIGatewayProxyHandler = async (event) => {
     nameFile = `${name}_${date}.zip`;
   } else if (nome === "Arquivos dos modelos de geração de cenários de vazões") {
     name = "Gevazp";
-    nameFile = `${name}_${date}.zip`;
+    nameFile = `${name}_${Number(date) + 1}.zip`;
   } else if (nome === "Acomph") {
     name = "Acomph";
     nameFile = `${name}_${date}.xls`;
@@ -118,6 +93,35 @@ export const handler: APIGatewayProxyHandler = async (event) => {
       Key: `${name}/${nameFile}`,
     })
     .promise();
+
+  const prisma = new PrismaClient();
+
+  const findRegister = await prisma.tbl_file_data.findFirst({
+    take: 1,
+    where: {
+      nom_file: name,
+      dat_file_publi: new Date(periodicidade),
+    },
+  });
+
+  if (!findRegister) {
+    await prisma.tbl_file_data.create({
+      data: {
+        nom_file: name,
+        dat_file_publi: new Date(periodicidade),
+        dat_file_download: new Date(),
+      },
+    });
+  } else {
+    await prisma.tbl_file_data.update({
+      where: {
+        num_file: findRegister.num_file,
+      },
+      data: {
+        dat_file_download: new Date(),
+      },
+    });
+  }
 
   if (nameFile.includes(".zip")) {
     const zip = s3

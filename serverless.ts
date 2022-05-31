@@ -6,7 +6,6 @@ const serverlessConfiguration: AWS = {
   plugins: [
     "serverless-dotenv-plugin",
     "serverless-esbuild",
-    "serverless-dynamodb-local",
     "serverless-offline",
   ],
   provider: {
@@ -22,11 +21,7 @@ const serverlessConfiguration: AWS = {
       NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
     },
     iamRoleStatements: [
-      {
-        Effect: "Allow",
-        Action: ["dynamodb:*"],
-        Resource: ["*"],
-      },
+      
       {
         Effect: "Allow",
         Action: ["s3:*"],
@@ -90,49 +85,9 @@ const serverlessConfiguration: AWS = {
       platform: "node",
       concurrency: 10,
     },
-    dynamodb: {
-      stages: ["dev", "local"],
-      start: {
-        port: 8000,
-        inMemory: true,
-        migrate: true,
-      },
-    },
+    
   },
-  resources: {
-    Resources: {
-      dbDocuments: {
-        Type: "AWS::DynamoDB::Table",
-        Properties: {
-          TableName: "received_tables",
-          ProvisionedThroughput: {
-            ReadCapacityUnits: 8,
-            WriteCapacityUnits: 8,
-          },
-          KeySchema: [
-            {
-              AttributeName: "nome",
-              KeyType: "HASH", //Partition key
-            },
-            {
-              AttributeName: "periodicidade",
-              KeyType: "RANGE", //Sort key
-            },
-          ],
-          AttributeDefinitions: [
-            {
-              AttributeName: "nome",
-              AttributeType: "S",
-            },
-            {
-              AttributeName: "periodicidade",
-              AttributeType: "S",
-            },
-          ],
-        },
-      },
-    },
-  },
+  
 };
 
 module.exports = serverlessConfiguration;
