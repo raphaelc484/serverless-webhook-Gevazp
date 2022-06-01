@@ -12,6 +12,7 @@ const serverlessConfiguration: AWS = {
     name: "aws",
     runtime: "nodejs14.x",
     region: "sa-east-1",
+    timeout: 60,
     apiGateway: {
       minimumCompressionSize: 1024,
       shouldStartNameWithService: true,
@@ -21,7 +22,6 @@ const serverlessConfiguration: AWS = {
       NODE_OPTIONS: "--enable-source-maps --stack-trace-limit=1000",
     },
     iamRoleStatements: [
-      
       {
         Effect: "Allow",
         Action: ["s3:*"],
@@ -85,9 +85,7 @@ const serverlessConfiguration: AWS = {
       platform: "node",
       concurrency: 10,
     },
-    
   },
-  
 };
 
 module.exports = serverlessConfiguration;

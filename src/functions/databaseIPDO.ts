@@ -1,7 +1,10 @@
 import { S3Handler } from "aws-lambda";
 import { S3 } from "aws-sdk";
 import XLSX from "xlsx";
-import { PrismaClient } from "@prisma/client";
+import { IPDOArmSis } from "../service/IPDO/IPDOArmSis";
+import { IPDOEnaData } from "../service/IPDO/IPDOEnaData";
+import { IPDOLoadData } from "../service/IPDO/IPDOLoadData";
+import { MicrosoftTeam } from "../api/webhookTeams";
 
 export const handler: S3Handler = async (event) => {
   const bucketName = event.Records[0].s3.bucket.name;
@@ -16,87 +19,41 @@ export const handler: S3Handler = async (event) => {
 
   if (dataRead) {
     try {
-      const prisma = new PrismaClient();
-
-      const findLastDateDocType = await prisma.tbl_file_data.findFirst({
-        where: {
-          nom_file: docType,
-        },
-      });
-
-      const findLastDataInSystem = await prisma.tbl_arm_ssis.findMany({
-        take: 4,
-        where: {
-          dat_medicao: findLastDateDocType.dat_file_publi,
-          cod_fonte: 3,
-        },
-      });
-
       const wb = XLSX.read(dataRead.Body, { type: "buffer" });
       const ws = wb.Sheets.IPDO;
 
-      await prisma.tbl_arm_ssis.upsert({
-        where: {
-          id: findLastDataInSystem[0].id,
-        },
-        create: {
-          cod_fonte: 3,
-          num_ssis: 1,
-          dat_medicao: findLastDateDocType.dat_file_publi,
-          val_arm_p: ws.R65.v,
-        },
-        update: {
-          num_ssis: 1,
-          val_arm_p: ws.R65.v,
-        },
+      await IPDOArmSis({
+        docType,
+        valorSudeste: ws.R65.v,
+        valorSul: ws.R64.v,
+        valorNordeste: ws.R63.v,
+        valorNorte: ws.R62.v,
       });
 
-      await prisma.tbl_arm_ssis.upsert({
-        where: {
-          id: findLastDataInSystem[1].id,
-        },
-        create: {
-          cod_fonte: 3,
-          num_ssis: 2,
-          dat_medicao: findLastDateDocType.dat_file_publi,
-          val_arm_p: ws.R64.v,
-        },
-        update: {
-          num_ssis: 2,
-          val_arm_p: ws.R64.v,
-        },
+      await IPDOEnaData({
+        docType,
+        valorSudeste: ws.M65.v,
+        valorSul: ws.M64.v,
+        valorNordeste: ws.M63.v,
+        valorNorte: ws.M62.v,
       });
 
-      await prisma.tbl_arm_ssis.upsert({
-        where: {
-          id: findLastDataInSystem[2].id,
-        },
-        create: {
-          cod_fonte: 3,
-          num_ssis: 3,
-          dat_medicao: findLastDateDocType.dat_file_publi,
-          val_arm_p: ws.R63.v,
-        },
-        update: {
-          num_ssis: 3,
-          val_arm_p: ws.R63.v,
-        },
+      await IPDOLoadData({
+        docType,
+        valorPredSudeste: ws.M40.v,
+        valorVerifSudeste: ws.O40.v,
+        valorPredSul: ws.M48.v,
+        valorVerifSul: ws.O48.v,
+        valorPredNordeste: ws.M32.v,
+        valorVerifNordeste: ws.O32.v,
+        valorPredNorte: ws.M24.v,
+        valorVerifNorte: ws.O24.v,
       });
 
-      await prisma.tbl_arm_ssis.upsert({
-        where: {
-          id: findLastDataInSystem[3].id,
-        },
-        create: {
-          cod_fonte: 3,
-          num_ssis: 4,
-          dat_medicao: findLastDateDocType.dat_file_publi,
-          val_arm_p: ws.R62.v,
-        },
-        update: {
-          num_ssis: 4,
-          val_arm_p: ws.R62.v,
-        },
+      await MicrosoftTeam({
+        title: "Dados IPDO Atualizados",
+        message:
+          "Dados do IPDO atualizados, clique no link para acessar o relatório",
       });
     } catch (error) {
       console.log(error);
