@@ -63,6 +63,26 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    databaseDessem: {
+      handler: "src/functions/databaseDessem.handler",
+      events: [
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "s3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "Dessem/",
+              },
+              {
+                suffix: "DP.txt",
+              },
+            ],
+            existing: true,
+          },
+        },
+      ],
+    },
   },
   package: {
     individually: true,
