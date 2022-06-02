@@ -53,8 +53,8 @@ export const handler: S3Handler = async (event) => {
   if (dataRead) {
     try {
       const arquivo = dataRead.Body.toString("utf-8");
-      const testeLeitura = fs.readFileSync(arquivo, "utf-8").split("\n");
-      console.log(testeLeitura);
+      // const testeLeitura = fs.readFileSync(arquivo, "utf-8").split("\n");
+      console.log(arquivo);
 
       //     const prisma = new PrismaClient();
 
