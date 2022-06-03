@@ -1,7 +1,6 @@
 import { S3Handler } from "aws-lambda";
 import { S3 } from "aws-sdk";
 import { DecompDataLoadWeekly } from "../service/Decomp/DecompDataLoadWeekly";
-import { MicrosoftTeam } from "../api/webhookTeams";
 
 export const handler: S3Handler = async (event) => {
   const bucketName = event.Records[0].s3.bucket.name;
@@ -87,12 +86,6 @@ export const handler: S3Handler = async (event) => {
       }
 
       await DecompDataLoadWeekly({ docType, dataTXT: mathResults });
-
-      // await MicrosoftTeam({
-      //   title: "Previsão de Carga Atualizada",
-      //   message:
-      //     "Dados semanais de Carga atualizados, clique no link para acessar o relatório",
-      // });
     } catch (error) {
       console.log(error);
     }

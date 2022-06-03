@@ -92,10 +92,30 @@ const serverlessConfiguration: AWS = {
             event: "s3:ObjectCreated:*",
             rules: [
               {
-                prefix: "Decomp/",
+                prefix: "Decomp/CargaDecomp_PMO",
               },
               {
                 suffix: ".txt",
+              },
+            ],
+            existing: true,
+          },
+        },
+      ],
+    },
+    databaseDecompMensal: {
+      handler: "src/functions/databaseDecompMensal.handler",
+      events: [
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "s3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "Decomp/Carga_PMO",
+              },
+              {
+                suffix: ".xlsx",
               },
             ],
             existing: true,
