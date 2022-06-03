@@ -83,6 +83,26 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    databaseDecomp: {
+      handler: "src/functions/databaseDecomp.handler",
+      events: [
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "s3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "Decomp/",
+              },
+              {
+                suffix: ".txt",
+              },
+            ],
+            existing: true,
+          },
+        },
+      ],
+    },
   },
   package: {
     individually: true,
