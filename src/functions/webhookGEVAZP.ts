@@ -15,6 +15,8 @@ interface IWebhookProps {
 export const handler: APIGatewayProxyHandler = async (event) => {
   const { url, nome, periodicidade } = JSON.parse(event.body) as IWebhookProps;
 
+  console.log(periodicidade);
+
   const date = dayjs(periodicidade).format("YYYYMM");
 
   const dataName = await takeName({ nome, date });

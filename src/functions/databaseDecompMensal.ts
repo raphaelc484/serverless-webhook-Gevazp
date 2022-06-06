@@ -2,6 +2,7 @@ import { S3Handler } from "aws-lambda";
 import { S3 } from "aws-sdk";
 import { set } from "date-fns";
 import { DecompDataLoadMonthly } from "../service/Decomp/DecompDataLoadMonthly";
+import { DecompDataRev0 } from "../service/Decomp/DecompDataRev0";
 import { MicrosoftTeam } from "../api/webhookTeams";
 
 import XLSX from "xlsx";
@@ -27,57 +28,62 @@ export const handler: S3Handler = async (event) => {
     .promise();
 
   if (dataRead) {
-    try {
-      const wb = XLSX.read(dataRead.Body, { type: "buffer" });
-      const ws = wb.Sheets["Relatório SCPC"];
-      const ceduleWithTime: string = ws.K3.v;
+    if (listFilesBucket[0].includes("Rev 0")) {
+      await DecompDataRev0({ docType });
+    } else {
+      try {
+        const wb = XLSX.read(dataRead.Body, { type: "buffer" });
+        const ws = wb.Sheets["Relatório SCPC"];
+        const ceduleWithTime: string = ws.K3.v;
 
-      const ceduleWithTimeSplit = ceduleWithTime.split("de ");
-      const ceduleWithTimeSplitMonthAndYear = ceduleWithTimeSplit[1].split("/");
-      const monthOfYear = [
-        { month: "Janeiro", n: 0 },
-        { month: "Fevereiro", n: 1 },
-        { month: "Março", n: 2 },
-        { month: "Abril", n: 3 },
-        { month: "Maio", n: 4 },
-        { month: "Junho", n: 5 },
-        { month: "Julho", n: 6 },
-        { month: "Agosto", n: 7 },
-        { month: "Setembro", n: 8 },
-        { month: "Outubro", n: 9 },
-        { month: "Novembro", n: 10 },
-        { month: "Dezembro", n: 11 },
-      ];
-      const ceduleWithTimeSplitMonth = monthOfYear.filter(
-        (k) => k.month === ceduleWithTimeSplitMonthAndYear[0]
-      );
+        const ceduleWithTimeSplit = ceduleWithTime.split("de ");
+        const ceduleWithTimeSplitMonthAndYear =
+          ceduleWithTimeSplit[1].split("/");
+        const monthOfYear = [
+          { month: "Janeiro", n: 0 },
+          { month: "Fevereiro", n: 1 },
+          { month: "Março", n: 2 },
+          { month: "Abril", n: 3 },
+          { month: "Maio", n: 4 },
+          { month: "Junho", n: 5 },
+          { month: "Julho", n: 6 },
+          { month: "Agosto", n: 7 },
+          { month: "Setembro", n: 8 },
+          { month: "Outubro", n: 9 },
+          { month: "Novembro", n: 10 },
+          { month: "Dezembro", n: 11 },
+        ];
+        const ceduleWithTimeSplitMonth = monthOfYear.filter(
+          (k) => k.month === ceduleWithTimeSplitMonthAndYear[0]
+        );
 
-      const dateSet = set(new Date(), {
-        date: 1,
-        month: ceduleWithTimeSplitMonth[0].n,
-        year: parseFloat(ceduleWithTimeSplitMonthAndYear[1]),
-        hours: 0,
-        milliseconds: 0,
-        minutes: 0,
-        seconds: 0,
-      });
+        const dateSet = set(new Date(), {
+          date: 1,
+          month: ceduleWithTimeSplitMonth[0].n,
+          year: parseFloat(ceduleWithTimeSplitMonthAndYear[1]),
+          hours: 0,
+          milliseconds: 0,
+          minutes: 0,
+          seconds: 0,
+        });
 
-      await DecompDataLoadMonthly({
-        docType,
-        dateSet,
-        valorSudeste: ws.G16.v,
-        valorSul: ws.G17.v,
-        valorNordeste: ws.G14.v,
-        valorNorte: ws.G15.v,
-      });
+        await DecompDataLoadMonthly({
+          docType,
+          dateSet,
+          valorSudeste: ws.G16.v,
+          valorSul: ws.G17.v,
+          valorNordeste: ws.G14.v,
+          valorNorte: ws.G15.v,
+        });
 
-      await MicrosoftTeam({
-        title: "Previsão de Carga Atualizada",
-        message:
-          "Dados semanais de Carga atualizados, clique no link para acessar o relatório",
-      });
-    } catch (error) {
-      console.log(error);
+        await MicrosoftTeam({
+          title: "Previsão de Carga Atualizada",
+          message:
+            "Dados semanais de Carga atualizados, clique no link para acessar o relatório",
+        });
+      } catch (error) {
+        console.log(error);
+      }
     }
   }
 };

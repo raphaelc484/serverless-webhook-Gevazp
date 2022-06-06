@@ -63,7 +63,7 @@ export async function DecompDataLoadMonthly({
   } else {
     await prisma.tbl_load_monthly.update({
       where: {
-        num_load_monthly: findLastDateDocType[0],
+        num_load_monthly: findLastDataInSystem[0].num_load_monthly,
       },
       data: {
         val_load_monthly: valorSudeste,
@@ -73,7 +73,7 @@ export async function DecompDataLoadMonthly({
 
     await prisma.tbl_load_monthly.update({
       where: {
-        num_load_monthly: findLastDateDocType[1],
+        num_load_monthly: findLastDataInSystem[1].num_load_monthly,
       },
       data: {
         val_load_monthly: valorSul,
@@ -83,7 +83,7 @@ export async function DecompDataLoadMonthly({
 
     await prisma.tbl_load_monthly.update({
       where: {
-        num_load_monthly: findLastDateDocType[2],
+        num_load_monthly: findLastDataInSystem[2].num_load_monthly,
       },
       data: {
         val_load_monthly: valorNordeste,
@@ -93,7 +93,7 @@ export async function DecompDataLoadMonthly({
 
     await prisma.tbl_load_monthly.update({
       where: {
-        num_load_monthly: findLastDateDocType[2],
+        num_load_monthly: findLastDataInSystem[3].num_load_monthly,
       },
       data: {
         val_load_monthly: valorNorte,
