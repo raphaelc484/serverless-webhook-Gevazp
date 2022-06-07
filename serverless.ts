@@ -123,6 +123,46 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    databaseConsistidos: {
+      handler: "src/functions/databaseConsistidos.handler",
+      events: [
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "s3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "Consistidos/Consistido/",
+              },
+              {
+                suffix: "preliminar.xls",
+              },
+            ],
+            existing: true,
+          },
+        },
+      ],
+    },
+    databaseNConsistidos: {
+      handler: "src/functions/databaseNConsistidos.handler",
+      events: [
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "s3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "N_consistidos/Nao_Consistido/",
+              },
+              {
+                suffix: "preliminar.xls",
+              },
+            ],
+            existing: true,
+          },
+        },
+      ],
+    },
   },
   package: {
     individually: true,
