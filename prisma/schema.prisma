@@ -67,7 +67,7 @@ model tbl_flow_forecast {
   val_week6     Float?    @db.Float
   val_month     Float?    @db.Float
   dat_forecast  DateTime? @db.Date
-  ind_consisted Bytes     @db.Binary(1)
+  ind_consisted Float     @db.Float
   val_month_mlt Float?    @db.Float
   tbl_ssis      tbl_ssis  @relation(fields: [num_ssis], references: [num_ssis], onUpdate: Restrict, map: "tbl_flow_forecast_tbl_ssis_FK")
 
