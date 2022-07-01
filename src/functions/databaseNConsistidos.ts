@@ -35,8 +35,6 @@ export const handler: S3Handler = async (event) => {
       let wsWeekPartTwo;
 
       if (listFilesBucket[0].includes("REV")) {
-        console.log("caiu no rev");
-
         wb = XLSX.read(dataRead.Body, { type: "buffer" });
         wsMonth = wb.Sheets["REV-2"];
         wsWeekPartOne = wb.Sheets["REV-5"];
@@ -102,7 +100,6 @@ export const handler: S3Handler = async (event) => {
           norte,
         });
       } else {
-        console.log("sem rev");
         wb = XLSX.read(dataRead.Body, { type: "buffer" });
         wsMonth = wb.Sheets["Tab-5-6-7"];
         wsWeekPartOne = wb.Sheets["Tab-12"];

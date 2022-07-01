@@ -163,6 +163,56 @@ const serverlessConfiguration: AWS = {
         },
       ],
     },
+    databaseBacias: {
+      handler: "src/functions/databaseBacias.handler",
+      events: [
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "s3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "ECMWF/ECMWF",
+              },
+              {
+                suffix: ".csv",
+              },
+            ],
+            existing: true,
+          },
+        },
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "s3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "Eta40/Eta40",
+              },
+              {
+                suffix: ".csv",
+              },
+            ],
+            existing: true,
+          },
+        },
+        {
+          s3: {
+            bucket: "bucket-docs-nodejs",
+            event: "s3:ObjectCreated:*",
+            rules: [
+              {
+                prefix: "Gefs50/Gefs50",
+              },
+              {
+                suffix: ".csv",
+              },
+            ],
+            existing: true,
+          },
+        },
+      ],
+    },
   },
   package: {
     individually: true,
