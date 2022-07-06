@@ -174,5 +174,6 @@ export const handler: S3Handler = async (event) => {
     title: "Previsão de Vazões Atualizada - Consistido",
     message:
       "Dados semanais de Vazões atualizados, clique no link para acessar o relatório",
+    url: "http://infomiddle.idealenergia.com/",
   });
 };

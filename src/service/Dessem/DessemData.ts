@@ -121,4 +121,6 @@ export async function DessemData({ docType, dataTXT }: IDessemProps) {
       });
     }
   }
+
+  console.log(tableFromTxt);
 }

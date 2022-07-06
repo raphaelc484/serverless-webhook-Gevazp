@@ -48,6 +48,7 @@ export const handler: S3Handler = async (event) => {
         title: "Previsão do Dessem",
         message:
           "Dados diários do Dessem, clique no link para acessar o relatório",
+        url: "http://infomiddle.idealenergia.com/",
       });
     } catch (error) {
       console.log(error);

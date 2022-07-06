@@ -80,6 +80,7 @@ export const handler: S3Handler = async (event) => {
           title: "Previsão de Carga Atualizada",
           message:
             "Dados semanais de Carga atualizados, clique no link para acessar o relatório",
+          url: "http://infomiddle.idealenergia.com/",
         });
       } catch (error) {
         console.log(error);

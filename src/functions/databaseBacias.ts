@@ -1,6 +1,7 @@
 import { S3Handler } from "aws-lambda";
 import { S3 } from "aws-sdk";
 import { BaciasDataPrecipitation } from "../service/Bacias/BaciasDataPrecipitation";
+import { MicrosoftTeam } from "../api/webhookTeams";
 
 export const handler: S3Handler = async (event) => {
   const bucketName = event.Records[0].s3.bucket.name;
@@ -50,4 +51,10 @@ export const handler: S3Handler = async (event) => {
   await Promise.all(dataList);
 
   await BaciasDataPrecipitation({ docType, dataList });
+
+  await MicrosoftTeam({
+    title: `Dados ${docType.toUpperCase()} Atualizados`,
+    message: `Dados do ${docType.toUpperCase()} atualizados, clique no link para acessar o relatório`,
+    url: "http://infomiddle.idealenergia.com",
+  });
 };

@@ -54,6 +54,7 @@ export const handler: S3Handler = async (event) => {
         title: "Dados IPDO Atualizados",
         message:
           "Dados do IPDO atualizados, clique no link para acessar o relatório",
+        url: "http://infomiddle.idealenergia.com/",
       });
     } catch (error) {
       console.log(error);

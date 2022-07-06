@@ -10,9 +10,10 @@ const webhookTeams = axios.create({
 interface Msg {
   title: string;
   message: string;
+  url: string;
 }
 
-export async function MicrosoftTeam({ title, message }: Msg) {
+export async function MicrosoftTeam({ title, message, url }: Msg) {
   await webhookTeams.post(process.env.WEBHOOK_MICROSOFT_TEAMS, {
     "@type": "MessageCard",
     summary: title,
@@ -25,7 +26,7 @@ export async function MicrosoftTeam({ title, message }: Msg) {
         targets: [
           {
             os: "default",
-            uri: "http://infomiddle.idealenergia.com/",
+            uri: url,
           },
         ],
       },
