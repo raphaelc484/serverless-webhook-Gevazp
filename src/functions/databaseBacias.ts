@@ -50,7 +50,7 @@ export const handler: S3Handler = async (event) => {
 
   await Promise.all(dataList);
 
-  await BaciasDataPrecipitation({ docType, dataList });
+  await BaciasDataPrecipitation({ dataList });
 
   await MicrosoftTeam({
     title: `Dados ${docType.toUpperCase()} Atualizados`,

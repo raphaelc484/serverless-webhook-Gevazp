@@ -12,7 +12,7 @@ interface IBaciasProps {
   nom_bacia: string;
   val_prec: string;
 }
-export async function BaciasDataPrecipitation({ docType, dataList }) {
+export async function BaciasDataPrecipitation({ dataList }) {
   const prisma = new PrismaClient();
 
   for (let i = 0; i < dataList.length; i += 1) {
@@ -36,12 +36,4 @@ export async function BaciasDataPrecipitation({ docType, dataList }) {
       },
     });
   }
-
-  await prisma.tbl_file_data.create({
-    data: {
-      nom_file: docType,
-      dat_file_publi: new Date(),
-      dat_file_download: new Date(),
-    },
-  });
 }
